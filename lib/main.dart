@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
+import 'screens/add_pill_screen.dart';
+import 'screens/search_pill_screen.dart';
 
 
 void main() {
@@ -18,7 +20,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         fontFamily: 'Pretendard',
       ),
-      home: const HomeScreen(),
+      home: const SearchPillScreen(),
     );
   }
 }
