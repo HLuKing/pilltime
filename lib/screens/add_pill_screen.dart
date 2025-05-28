@@ -1,135 +1,144 @@
 import 'package:flutter/material.dart';
+import 'package:pillsolo/screens/search_pill_screen.dart';
+import '../models/pill_create_request.dart';
+import '../services/pill_api_service.dart';
 
-class AddPillScreen extends StatelessWidget {
-  const AddPillScreen({super.key});
+class AddPillScreen extends StatefulWidget {
+  final int? pillId;
+
+  const AddPillScreen({super.key, this.pillId});
+
+  @override
+  State<AddPillScreen> createState() => _AddPillScreenState();
+}
+
+class _AddPillScreenState extends State<AddPillScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController _pillNameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _dosePeriodController = TextEditingController();
+
+  String doseTime = '아침';
+  bool external = true;
+  int? externalId;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.pillId != null) {
+      _loadPillData(widget.pillId!);
+    }
+  }
+
+  Future<void> _loadPillData(int id) async {
+    try {
+      final pill = await PillApiService().fetchPillDetail(id);
+      setState(() {
+        _pillNameController.text = pill.name ?? '';
+        _descriptionController.text = pill.description ?? '';
+        _dosePeriodController.text = pill.dosePeriod.toString();
+        doseTime = pill.doseTime ?? '아침';
+        external = pill.external ?? true;
+        externalId = pill.externalId;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('약 정보 불러오기 실패: ${e.toString()}')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed:() {
-            Navigator.pop(context);
-          },
-        ),
-        title: const Text(
-          '약 추가하기',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 1,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 24),
-                  const Text(
-                    '약 이름',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: '예: 타이레놀',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
+      appBar: AppBar(title: const Text('약 추가하기')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              TextFormField(
+                controller: _pillNameController,
+                decoration: const InputDecoration(labelText: '약 이름'),
+                readOnly: true,
+                onTap: () async {
+                  final selectedPill = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SearchPillScreen(
+                        onPillSelected: (pill) {
+                          Navigator.pop(context, pill);
+                        },
                       ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
-                  ),
+                  );
 
-                  const SizedBox(height: 24),
-                  const Text(
-                    '복용 설명',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: '예: 식후 1정',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-                  const Text(
-                    '복용 시간',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: '09:00',
-                    items: ['09:00', '13:00', '19:00'].map((time) {
-                      return DropdownMenuItem(
-                        value: time,
-                        child: Text(time),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      // choose answer
-                    },
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-                  const Text(
-                    '복용 기간',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<int>(
-                    hint: const Text('복용 기간 선택 (일)'),
-                    items: List.generate(7, (index) => index + 1).map((day) {
-                      return DropdownMenuItem(
-                        value: day,
-                        child: Text('$day일'),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-
-                    },
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    ),
-                  ),
-                ],
-              ), 
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () {},
-                child: Text('저장하기'),
+                  if (selectedPill != null) {
+                    setState(() {
+                      _pillNameController.text = selectedPill.itemName ?? '';
+                      externalId = selectedPill.itemSeq;
+                      external = true;
+                    });
+                  }
+                },
               ),
-            ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: doseTime,
+                items: ['아침', '점심', '저녁', '취침']
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+                onChanged: (val) => setState(() => doseTime = val!),
+                decoration: const InputDecoration(labelText: '복용 시간'),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _dosePeriodController,
+                decoration: const InputDecoration(labelText: '복용 기간 (일 수)'),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(labelText: '복용 설명'),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () async {
+                  if (!_formKey.currentState!.validate()) return;
+
+                  final request = PillCreateRequest(
+                    name: _pillNameController.text,
+                    doseTime: doseTime,
+                    dosePeriod:
+                        int.tryParse(_dosePeriodController.text) ?? 7,
+                    description: _descriptionController.text,
+                    external: external,
+                    externalId: externalId,
+                  );
+
+                  try {
+                    if (widget.pillId != null) {
+                      await PillApiService()
+                          .updatePill(widget.pillId!, request);
+                    } else {
+                      await PillApiService().addPill(request);
+                    }
+
+                    if (context.mounted) Navigator.pop(context, true);
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('오류: ${e.toString()}')),
+                    );
+                  }
+                },
+                child: const Text('저장'),
+              )
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

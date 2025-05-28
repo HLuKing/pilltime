@@ -1,150 +1,132 @@
 import 'package:flutter/material.dart';
+import '../models/medicine_response.dart';
+import '../services/pill_api_service.dart';
 
-class SearchPillScreen extends StatefulWidget{
-  const SearchPillScreen({super.key});
+class SearchPillScreen extends StatefulWidget {
+  final Function(MedicineResponse) onPillSelected;
+
+  const SearchPillScreen({super.key, required this.onPillSelected});
 
   @override
   State<SearchPillScreen> createState() => _SearchPillScreenState();
 }
+
 class _SearchPillScreenState extends State<SearchPillScreen> {
-  int? selectedIndex;
+  final TextEditingController _controller = TextEditingController();
+  final PillApiService _apiService = PillApiService();
+
+  List<MedicineResponse> _results = [];
+  MedicineResponse? _selectedPill;
+  bool _isLoading = false;
+  String? _error;
+
+  Future<void> _search() async {
+    final query = _controller.text.trim();
+    if (query.isEmpty) return;
+
+    setState(() {
+      _isLoading = true;
+      _error = null;
+      _results = [];
+      _selectedPill = null;
+    });
+
+    try {
+      final results = await _apiService.searchPills(query);
+      setState(() => _results = results);
+    } catch (e) {
+      setState(() => _error = '검색에 실패했습니다: ${e.toString()}');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Widget _buildResultItem(MedicineResponse pill) {
+    final isSelected = pill == _selectedPill;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedPill = pill;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isSelected ? Colors.blue : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(8),
+          color: Colors.white,
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.medication, size: 32),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(pill.itemName ?? '이름 없음', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(pill.entpName ?? '제조사 없음', style: const TextStyle(color: Colors.grey)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('약 검색하기'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 1,
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: TextField(
+      appBar: AppBar(title: const Text('약 검색하기')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(
+              controller: _controller,
               decoration: InputDecoration(
-                hintText: '약 이름을 입력하세요.',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                labelText: '약 이름 입력',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: _search,
                 ),
-                prefixIcon: const Icon(Icons.search),
               ),
+              onSubmitted: (_) => _search(),
             ),
-          ),                // TODO: 여기에 검색 결과 리스트 추가 예정
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: ListView.builder(
-                itemCount: 3,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedIndex = index;
-                      });
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: selectedIndex == index
-                            ? Border.all(color: Colors.green, width: 2)
-                            : null,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          //약 이미지(placeholder) + 체크 아이콘
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: selectedIndex == index
-                                ? const Icon(Icons.check, color: Colors.white)
-                                : null,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
-                                Text(
-                                  '타이레놀 500mg(한미약품)',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  '두통, 치통, 발열 완화',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
+            const SizedBox(height: 16),
+            if (_isLoading)
+              const CircularProgressIndicator()
+            else if (_error != null)
+              Text(_error!, style: const TextStyle(color: Colors.red))
+            else if (_results.isEmpty)
+              const Text('검색 결과 없음')
+            else
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _results.length,
+                  itemBuilder: (_, index) => _buildResultItem(_results[index]),
+                ),
+              ),
+            const SizedBox(height: 16),
+            if (_selectedPill != null)
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context, _selectedPill);
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  minimumSize: const Size.fromHeight(48),
+                ),
+                child: const Text('선택하기'),
               ),
-            ),
-          ),
-        ],
-      ),
-
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(20),
-        child: SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: ElevatedButton(
-            onPressed: () {
-              if (selectedIndex == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('약을 선택해주세요.'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              } else {
-                //선택된 약이 있을 경우
-                // TODO: 선택된 야긍ㄹ 저장하거나 메인으로 전달
-                Navigator.pop(context); // 또는 
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text(
-              '선택하기',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ),
+          ],
         ),
       ),
     );
