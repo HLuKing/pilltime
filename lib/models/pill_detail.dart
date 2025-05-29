@@ -1,6 +1,6 @@
 class PillDetail {
   final int id;
-  final String? name;             // ✅ nullable 처리
+  final String? name;
   final String? description;
   final String? warning;
   final String? usage;
@@ -10,6 +10,12 @@ class PillDetail {
   final String? doseTime;
   final bool? external;
   final int? externalId;
+
+  // 🔽 추가할 필드
+  final String? precaution;
+  final String? sideEffect;
+  final String? storage;
+  final String? interaction;
 
   PillDetail({
     required this.id,
@@ -23,6 +29,10 @@ class PillDetail {
     this.doseTime,
     this.external,
     this.externalId,
+    this.precaution,
+    this.sideEffect,
+    this.storage,
+    this.interaction,
   });
 
   factory PillDetail.fromJson(Map<String, dynamic> json) {
@@ -38,6 +48,10 @@ class PillDetail {
       doseTime: json['doseTime'],
       external: json['external'],
       externalId: json['externalId'],
+      precaution: json['precaution'],
+      sideEffect: json['sideEffect'],
+      storage: json['storage'],
+      interaction: json['interaction'],
     );
   }
 }

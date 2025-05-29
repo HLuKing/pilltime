@@ -75,7 +75,7 @@ class _PillDetailScreenState extends State<PillDetailScreen> {
     if (confirm == true) {
       try {
         await PillApiService().deletePill(widget.pillId);
-        if (context.mounted) Navigator.pop(context, true); // 삭제 후 뒤로가기
+        if (context.mounted) Navigator.pop(context, true);
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -84,6 +84,19 @@ class _PillDetailScreenState extends State<PillDetailScreen> {
         }
       }
     }
+  }
+
+  Widget _buildInfoBlock(String title, String? content) {
+    if (content == null || content.trim().isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        Text(content),
+        const SizedBox(height: 12),
+      ],
+    );
   }
 
   @override
@@ -101,11 +114,22 @@ class _PillDetailScreenState extends State<PillDetailScreen> {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            Text('복용 시간: ${pill!.doseTime ?? '정보 없음'}'),
-            const SizedBox(height: 8),
-            Text('복용 기간: ${pill!.dosePeriod ?? 0}일'),
-            const SizedBox(height: 8),
-            Text('설명: ${pill!.description ?? '없음'}'),
+            if (pill!.imageUrl != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Image.network(pill!.imageUrl!, height: 120),
+              ),
+            _buildInfoBlock('복용 시간', pill!.doseTime),
+            _buildInfoBlock('복용 기간', '${pill!.dosePeriod ?? 0}일'),
+            _buildInfoBlock('복용 메모', pill!.description),
+            _buildInfoBlock('복용 방법', pill!.usage),
+            _buildInfoBlock('효능/효과', pill!.warning),
+            _buildInfoBlock('제조사', pill!.manufacturer),
+            _buildInfoBlock('주의사항', pill!.precaution),
+            _buildInfoBlock('상호작용', pill!.interaction),
+            _buildInfoBlock('부작용', pill!.sideEffect),
+            _buildInfoBlock('보관 방법', pill!.storage),
+
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: takenToday ? null : _markAsTaken,

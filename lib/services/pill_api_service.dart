@@ -48,7 +48,7 @@ class PillApiService {
   }
 
   Future<PillDetail> fetchPillDetail(int id) async {
-    final response = await http.get(Uri.parse('$baseUrl/medicines/$id/detail-view'));
+    final response = await http.get(Uri.parse('$baseUrl/medicines/$id/details'));
 
     if (response.statusCode == 200) {
       return PillDetail.fromJson(json.decode(response.body));
