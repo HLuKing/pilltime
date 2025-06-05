@@ -52,7 +52,9 @@ class _AddPillScreenState extends State<AddPillScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('약 추가하기')),
+      appBar: AppBar(
+        title: Text(widget.pillId != null ? '약 수정하기' : '약 추가하기'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
