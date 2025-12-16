@@ -6,6 +6,9 @@ class PillCreateRequest {
   final bool external;
   final int? externalId;
 
+  final String? imageUrl;
+  final String? manufacturer;
+
   PillCreateRequest({
     required this.name,
     required this.doseTime,
@@ -13,6 +16,8 @@ class PillCreateRequest {
     required this.description,
     required this.external,
     this.externalId,
+    this.imageUrl,
+    this.manufacturer,
   });
 
   Map<String, dynamic> toJson() {
@@ -23,6 +28,8 @@ class PillCreateRequest {
       'description': description,
       'external': external,
       'externalId': externalId,
+      'imageUrl': imageUrl,
+      'manufacturer': manufacturer,
     };
   }
 }

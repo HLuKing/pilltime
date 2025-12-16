@@ -4,8 +4,14 @@ import 'providers/pill_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/today_pill_screen.dart';
 import 'screens/add_pill_screen.dart';
+import 'services/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // 알림 서비스 초기화
+  await NotificationService().init();
+  
   runApp(
     ChangeNotifierProvider(
       create: (_) => PillProvider()..loadPills(),

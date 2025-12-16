@@ -11,11 +11,12 @@ class PillDetail {
   final bool? external;
   final int? externalId;
 
-  // 🔽 추가할 필드
   final String? precaution;
   final String? sideEffect;
   final String? storage;
   final String? interaction;
+
+  final String? efficacy;
 
   PillDetail({
     required this.id,
@@ -33,6 +34,7 @@ class PillDetail {
     this.sideEffect,
     this.storage,
     this.interaction,
+    this.efficacy,
   });
 
   factory PillDetail.fromJson(Map<String, dynamic> json) {
@@ -52,6 +54,7 @@ class PillDetail {
       sideEffect: json['sideEffect'],
       storage: json['storage'],
       interaction: json['interaction'],
+      efficacy: json['efficacy'],
     );
   }
 }

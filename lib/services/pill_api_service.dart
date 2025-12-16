@@ -79,14 +79,14 @@ class PillApiService {
     }
   }
 
-  Future<void> markPillAsTaken(int pillId) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/medicines/$pillId/take'),
-    );
-    if (response.statusCode != 200) {
-      throw Exception('복용 기록 저장 실패');
-    }
-  }
+  // Future<void> markPillAsTaken(int pillId) async {
+  //   final response = await http.post(
+  //     Uri.parse('$baseUrl/medicines/$pillId/take'),
+  //   );
+  //   if (response.statusCode != 200) {
+  //     throw Exception('복용 기록 저장 실패');
+  //   }
+  // }
 
   Future<List<TodayPill>> fetchTodayPills() async {
     final response = await http.get(Uri.parse('$baseUrl/medicines/today'));

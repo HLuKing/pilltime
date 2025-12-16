@@ -45,5 +45,18 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSUserNotificationUsageDescription</key>
+	<string>약 복용 시간을 알려드리기 위해 알림 권한이 필요합니다.</string>
+
+	<!-- 백그라운드 모드 -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>background-processing</string>
+		<string>background-fetch</string>
+	</array>
+
+	<!-- 앱 이름 -->
+	<key>CFBundleDisplayName</key>
+	<string>PillSolo</string>
 </dict>
 </plist>
