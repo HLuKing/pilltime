@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pillsolo/screens/pill_detail_screen.dart';
 import 'package:provider/provider.dart';
 import '../providers/pill_provider.dart';
@@ -126,6 +127,42 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSummaryCard(double progress, int taken, int total) {
+    String today = DateFormat('yyyy년 MM월 dd일 EEEE', 'ko_KR').format(DateTime.now());
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(today, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('복용 확률', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('$taken/$total', style: const TextStyle(fontSize: 18, color: Color(0xFF536DFE), fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          LinearProgressIndicator(
+            value: progress,
+            backgroundColor: Colors.grey[200],
+            color: const Color(0xFF536DFE),
+            minHeight: 8,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimeSlotSection(String title, IconData icon, Color color, List<Map<String, dynamic>> items) {
     
   }
 }
